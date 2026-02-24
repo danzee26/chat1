@@ -1,0 +1,33 @@
+
+services:
+  nginx:
+    build: ./docker/nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./www:/var/www/
+      - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - app_net
+    depends_on:
+      - n8n
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - NODE_ENV=production
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
