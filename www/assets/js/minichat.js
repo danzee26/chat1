@@ -8,6 +8,26 @@
     return $('<div>').text(text).html();
   }
 
+  function formatTime(date) {
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  const EMOJI_LIST = [
+    '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊',
+    '😇', '🙂', '😉', '😌', '😍', '🥰', '😘', '😗',
+    '😙', '😚', '😋', '😛', '😜', '🤪', '😝', '🤑',
+    '🤗', '🤭', '🤫', '🤔', '🤐', '🤨', '😐', '😑',
+    '😶', '😏', '😣', '😥', '😮', '🤐', '😯', '😪',
+    '😫', '😴', '🤤', '😷', '🤒', '🤕', '🤢', '🤮',
+    '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙',
+    '👋', '🤚', '🖐️', '✋', '🖖', '👏', '🙌', '🤝',
+    '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍',
+    '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘',
+  ];
+
   function addMessage(author, text, time) {
     const isUser = author === 'Вы';
     const sideClass = isUser ? 'message-out' : 'message-in';
@@ -23,7 +43,8 @@
   }
 
   function sendMessage(text) {
-    addMessage('Вы', text, new Date().toLocaleTimeString());
+    const now = new Date();
+    addMessage('Вы', text, formatTime(now));
     $('#chatInput').val('');
 
     $.ajax({
@@ -35,14 +56,61 @@
     })
       .done(function (data) {
         const reply = (data && data.reply) ? data.reply : 'вас понял';
-        addMessage('Чат', reply, new Date().toLocaleTimeString());
+        addMessage('Чат', reply, formatTime(new Date()));
       })
       .fail(function () {
-        addMessage('Чат', 'Ошибка отправки', new Date().toLocaleTimeString());
+        addMessage('Чат', 'Ошибка отправки', formatTime(new Date()));
       });
   }
 
+  function buildEmojiPanel() {
+    const $panel = $('#emojiPanel');
+    $panel.empty();
+    const $grid = $('<div class="emoji-grid"></div>');
+    EMOJI_LIST.forEach(function (emoji) {
+      const $btn = $('<button type="button" class="emoji-btn" tabindex="0"></button>');
+      $btn.text(emoji);
+      $btn.on('click', function () {
+        const $input = $('#chatInput');
+        const el = $input[0];
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const val = $input.val();
+        $input.val(val.slice(0, start) + emoji + val.slice(end));
+        el.selectionStart = el.selectionEnd = start + emoji.length;
+        $input.focus();
+      });
+      $grid.append($btn);
+    });
+    $panel.append($grid);
+  }
+
+  function toggleEmojiPanel() {
+    const $panel = $('#emojiPanel');
+    const isOpen = $panel.hasClass('is-open');
+    $panel.toggleClass('is-open', !isOpen);
+    $panel.attr('aria-hidden', isOpen);
+  }
+
+  function closeEmojiPanel() {
+    $('#emojiPanel').removeClass('is-open').attr('aria-hidden', 'true');
+  }
+
   function init() {
+    buildEmojiPanel();
+
+    $('#emojiToggle').on('click', function (e) {
+      e.stopPropagation();
+      toggleEmojiPanel();
+    });
+
+    $(document).on('click', function () {
+      closeEmojiPanel();
+    });
+    $('#emojiPanel').on('click', function (e) {
+      e.stopPropagation();
+    });
+
     $('#sendBtn').on('click', function () {
       const text = $('#chatInput').val().trim();
       if (!text) return;

@@ -59,6 +59,61 @@
     color: #6c757d;
     margin-top: 2px;
   }
+  /* Контейнер поля ввода и панели смайликов */
+  .chat-input-wrap {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .chat-input-wrap .input-group {
+    flex: 1;
+    min-width: 0;
+  }
+  /* Выпадающая панель смайликов */
+  .emoji-panel {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 4px;
+    width: 100%;
+    max-width: 320px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 8px;
+    z-index: 100;
+  }
+  .emoji-panel.is-open {
+    display: block;
+  }
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+  }
+  .emoji-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: 32px;
+    padding: 0;
+    font-size: 1.4rem;
+    line-height: 1;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .emoji-btn:hover {
+    background: #e9ecef;
+  }
   </style>
 </head>
 
@@ -72,9 +127,13 @@
       <div id="chatMessages" class="border rounded p-2 mb-2" style="height:300px; overflow-y:auto;">
       </div>
 
-      <div class="input-group">
-        <textarea id="chatInput" class="form-control" placeholder="Введите сообщение"></textarea>
-        <button id="sendBtn" class="btn btn-primary">Отправить</button>
+      <div class="chat-input-wrap">
+        <div id="emojiPanel" class="emoji-panel" aria-hidden="true"></div>
+        <div class="input-group">
+          <button id="emojiToggle" type="button" class="btn btn-outline-secondary" title="Смайлики">😀</button>
+          <textarea id="chatInput" class="form-control" placeholder="Введите сообщение"></textarea>
+          <button id="sendBtn" class="btn btn-primary">Отправить</button>
+        </div>
       </div>
     </div>
   </div>
