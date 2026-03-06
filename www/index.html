@@ -46,6 +46,15 @@ $('#sendBtn').on('click', function () {
   addMessage('Вы', text, new Date().toLocaleTimeString());
       $('#chatInput').val('');
 });
+
+// Слушаем нажатие клавиш в поле ввода
+$('#chatInput').on('keydown', function (e) {
+  // Проверяем: нажата клавиша Enter (код 13) и НЕ зажат Shift
+  if (e.which === 13 && !e.shiftKey) {
+    e.preventDefault(); // Отменяем стандартный перенос строки
+    $('#sendBtn').click(); // Симулируем клик по кнопке "Отправить"
+  }
+});
 </script>
 
 </body>
