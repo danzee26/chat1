@@ -1,70 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <style>
-  /* Этот класс заставит текст внутри сообщений переноситься там, где нажат Enter */
-  .chat-text {
-    white-space: pre-wrap;
-    word-break: break-word; /* Чтобы длинные слова не вылезали за края */
-  }
-</style>
+    /* Этот класс заставит текст внутри сообщений переноситься там, где нажат Enter */
+    .chat-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      /* Чтобы длинные слова не вылезали за края */
+    }
+  </style>
 </head>
+
 <body>
   <div class="card mt-3">
-  <div class="card-header">
-    Чат менеджер ↔ закупщик
-  </div>
-
-  <div class="card-body p-2">
-    <div id="chatMessages" class="border rounded p-2 mb-2" style="height:300px; overflow-y:auto;">
+    <div class="card-header">
+      Чат менеджер ↔ закупщик
     </div>
 
-    <div class="input-group">
-      <textarea id="chatInput" class="form-control" placeholder="Введите сообщение"></textarea>
-      <button id="sendBtn" class="btn btn-primary">Отправить</button>
+    <div class="card-body p-2">
+      <div id="chatMessages" class="border rounded p-2 mb-2" style="height:300px; overflow-y:auto;">
+      </div>
+
+      <div class="input-group">
+        <textarea id="chatInput" class="form-control" placeholder="Введите сообщение"></textarea>
+        <button id="sendBtn" class="btn btn-primary">Отправить</button>
+      </div>
     </div>
   </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
 
-function escapeHtml(text) {
-  return $('<div>').text(text).html();
-}
+    function escapeHtml(text) {
+      return $('<div>').text(text).html();
+    }
 
-function addMessage(author, text, time) {
-  $('#chatMessages').append(`
+    function addMessage(author, text, time) {
+      $('#chatMessages').append(`
     <div class="mb-2">
       <small class="text-muted">${author} — ${time}</small>
       <div class="border rounded p-2 chat-text">${escapeHtml(text)}</div>
     </div>
   `);
 
-  $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
-}
+      $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+    }
 
-$('#sendBtn').on('click', function () {
-  const text = $('#chatInput').val().trim();
-  if (!text) return;
-  addMessage('Вы', text, new Date().toLocaleTimeString());
+    $('#sendBtn').on('click', function () {
+      const text = $('#chatInput').val().trim();
+      if (!text) return;
+      addMessage('Вы', text, new Date().toLocaleTimeString());
       $('#chatInput').val('');
-});
+    });
 
-// Слушаем нажатие клавиш в поле ввода
-$('#chatInput').on('keydown', function (e) {
-  // Проверяем: нажата клавиша Enter (код 13) и НЕ зажат Shift
-  if (e.which === 13 && !e.shiftKey) {
-    e.preventDefault(); // Отменяем стандартный перенос строки
-    $('#sendBtn').click(); // Симулируем клик по кнопке "Отправить"
-  }
-});
+    // Слушаем нажатие клавиш в поле ввода
+    $('#chatInput').on('keydown', function (e) {
+      // Проверяем: нажата клавиша Enter (код 13) и НЕ зажат Shift
+      if (e.which === 13 && !e.shiftKey) {
+        e.preventDefault(); // Отменяем стандартный перенос строки
+        $('#sendBtn').click(); // Симулируем клик по кнопке "Отправить"
+      }
+    });
 
 
-</script>
+  </script>
 
 </body>
+
 </html>
