@@ -18,12 +18,31 @@
     $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
   }
 
+  function sendMessage(text) {
+    addMessage('Вы', text, new Date().toLocaleTimeString());
+    $('#chatInput').val('');
+
+    $.ajax({
+      url: '/api/chat.php',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ message: text }),
+      dataType: 'json',
+    })
+      .done(function (data) {
+        const reply = (data && data.reply) ? data.reply : 'вас понял';
+        addMessage('Чат', reply, new Date().toLocaleTimeString());
+      })
+      .fail(function () {
+        addMessage('Чат', 'Ошибка отправки', new Date().toLocaleTimeString());
+      });
+  }
+
   function init() {
     $('#sendBtn').on('click', function () {
       const text = $('#chatInput').val().trim();
       if (!text) return;
-      addMessage('Вы', text, new Date().toLocaleTimeString());
-      $('#chatInput').val('');
+      sendMessage(text);
     });
 
     $('#chatInput').on('keydown', function (e) {
