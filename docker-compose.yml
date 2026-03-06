@@ -1,5 +1,15 @@
-
 services:
+  # Новый сервис PHP
+  php:
+    image: php:8.2-fpm
+    container_name: php_fpm
+    restart: unless-stopped
+    volumes:
+      # Важно: пути здесь и в nginx должны совпадать, чтобы PHP видел те же файлы
+      - ./www:/var/www/
+    networks:
+      - app_net
+
   nginx:
     build: ./docker/nginx
     container_name: nginx
@@ -10,7 +20,9 @@ services:
       - ./www:/var/www/
       - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./logs/nginx:/var/log/nginx
+      - ./data/logs/nginx:/var/log/nginx
+    depends_on:
+      - php # Теперь nginx ждет запуска php
     networks:
       - app_net
 
