@@ -9,10 +9,14 @@
   }
 
   function addMessage(author, text, time) {
+    const isUser = author === 'Вы';
+    const sideClass = isUser ? 'message-out' : 'message-in';
     $('#chatMessages').append(`
-      <div class="mb-2">
-        <small class="text-muted">${author} — ${time}</small>
-        <div class="border rounded p-2 chat-text">${escapeHtml(text)}</div>
+      <div class="message ${sideClass}">
+        <div class="bubble">
+          <div class="bubble-text">${escapeHtml(text)}</div>
+          <div class="bubble-time">${time}</div>
+        </div>
       </div>
     `);
     $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
