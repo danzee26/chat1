@@ -4,4 +4,5 @@ node_modules/
 
 # Игнорируем данные n8n и логи
 n8n_data/
+data/
 logs/
