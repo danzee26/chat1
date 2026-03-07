@@ -1,145 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <style>
-    #chatMessages {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  /* Общий контейнер сообщения */
-  .message {
-    display: flex;
-    width: 100%;
-  }
-  /* Собеседник слева */
-  .message-in {
-    justify-content: flex-start;
-  }
-  /* Вы справа */
-  .message-out {
-    justify-content: flex-end;
-  }
-  /* Пузырь сообщения */
-  .bubble {
-    max-width: 70%;
-    padding: 6px 8px 4px;
-    border-radius: 12px;
-    position: relative;
-    display: inline-flex;
-    flex-direction: column;
-    background: #ffffff;
-  }
-  /* Входящие */
-  .message-in .bubble {
-    background: #ffffff;
-    border: 1px solid #e4e4e4;
-    border-radius: 12px 12px 12px 0;
-  }
-  /* Исходящие (как в Телеграме) */
-  .message-out .bubble {
-    background: #d1f4ff;
-    border-radius: 12px 12px 0 12px;
-  }
-  /* Текст сообщения (с переносами по Enter) */
-  .bubble-text {
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-  /* Время справа внизу */
-  .bubble-time {
-    align-self: flex-end;
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-top: 2px;
-  }
-  /* Контейнер поля ввода и панели смайликов */
-  .chat-input-wrap {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-  }
-  .chat-input-wrap .input-group {
-    flex: 1;
-    min-width: 0;
-  }
-  /* Выпадающая панель смайликов */
-  .emoji-panel {
-    display: none;
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    margin-bottom: 4px;
-    width: 100%;
-    max-width: 320px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    padding: 8px;
-    z-index: 100;
-  }
-  .emoji-panel.is-open {
-    display: block;
-  }
-  .emoji-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 4px;
-  }
-  .emoji-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    aspect-ratio: 1;
-    min-height: 32px;
-    padding: 0;
-    font-size: 1.4rem;
-    line-height: 1;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
-    cursor: pointer;
-  }
-  .emoji-btn:hover {
-    background: #e9ecef;
-  }
-  </style>
-</head>
+  <body>
+    <div class="card m-5">
+      <div class="card-header">Чат менеджер ↔ закупщик</div>
 
-<body>
-  <div class="card m-5">
-    <div class="card-header">
-      Чат менеджер ↔ закупщик
-    </div>
+      <div class="card-body p-2">
+        <div
+          id="chatMessages"
+          class="border rounded p-2 mb-2"
+          style="height: 300px; overflow-y: auto"
+        ></div>
 
-    <div class="card-body p-2">
-      <div id="chatMessages" class="border rounded p-2 mb-2" style="height:300px; overflow-y:auto;">
-      </div>
-
-      <div class="chat-input-wrap">
-        <div id="emojiPanel" class="emoji-panel" aria-hidden="true"></div>
-        <div class="input-group">
-          <button id="emojiToggle" type="button" class="btn btn-outline-secondary" title="Смайлики">😀</button>
-          <textarea id="chatInput" class="form-control" placeholder="Введите сообщение"></textarea>
-          <button id="sendBtn" class="btn btn-primary">Отправить</button>
+        <div class="chat-input-wrap">
+          <div id="emojiPanel" class="emoji-panel" aria-hidden="true"></div>
+          <div class="input-group">
+            <button
+              id="emojiToggle"
+              type="button"
+              class="btn btn-outline-secondary"
+              title="Смайлики"
+            >
+              😀
+            </button>
+            <textarea
+              id="chatInput"
+              class="form-control"
+              placeholder="Введите сообщение"
+            ></textarea>
+            <button id="sendBtn" class="btn btn-primary">Отправить</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="assets/js/minichat.js"></script>
-
-</body>
-
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/minichat.js"></script>
+  </body>
 </html>
