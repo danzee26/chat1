@@ -30,7 +30,7 @@ services:
   # Новый сервис PHP
   php:
     build: ./docker/php # Указываем путь к папке с твоим PHP Dockerfile
-    container_name: php_fpm
+    container_name: chat_php_fpm
     restart: unless-stopped
     volumes:
       - ./www:/var/www/
@@ -39,7 +39,7 @@ services:
 
   nginx:
     build: ./docker/nginx # Указываем путь к папке с твоим Nginx Dockerfile
-    container_name: nginx
+    container_name: chat_nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -55,7 +55,7 @@ services:
 
   n8n:
     image: n8nio/n8n:latest
-    container_name: n8n
+    container_name: chat_n8n
     restart: unless-stopped
     environment:
       - N8N_HOST=localhost
