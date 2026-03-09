@@ -5,6 +5,7 @@
 (function ($) {
   "use strict";
 
+  let currentChatId = 1; // По умолчанию первый чат
   let oldestMessageId = null;
   let isLoadingHistory = false;
   let hasMoreHistory = true;
@@ -142,7 +143,7 @@
       url: "/api/chat.php",
       method: "POST",
       contentType: "application/json",
-      data: JSON.stringify({ message: text }),
+      data: JSON.stringify({ message: text, chat_id: currentChatId }),
       dataType: "json",
     })
       .done(function (data) {
@@ -155,23 +156,27 @@
   }
 
   function loadInitialHistory() {
-    $.get("/api/get_messages.php", { limit: 30 }, function (messages) {
-      const $container = $("#chatMessages");
-      $container.empty();
+    $.get(
+      "/api/get_messages.php",
+      { limit: 30, chat_id: currentChatId },
+      function (messages) {
+        const $container = $("#chatMessages");
+        $container.empty();
 
-      messages.forEach(function (msg) {
-        const authorName = msg.author === "user" ? "Вы" : "Бот";
-        addMessage(authorName, msg.text, msg.time);
-      });
+        messages.forEach(function (msg) {
+          const authorName = msg.author === "user" ? "Вы" : "Бот";
+          addMessage(authorName, msg.text, msg.time);
+        });
 
-      if (messages.length > 0) {
-        oldestMessageId = messages[0].id;
-        hasMoreHistory = true;
-      } else {
-        oldestMessageId = null;
-        hasMoreHistory = false;
-      }
-    });
+        if (messages.length > 0) {
+          oldestMessageId = messages[0].id;
+          hasMoreHistory = true;
+        } else {
+          oldestMessageId = null;
+          hasMoreHistory = false;
+        }
+      },
+    );
   }
 
   function loadOlderMessages() {
@@ -180,7 +185,7 @@
 
     $.get(
       "/api/get_messages.php",
-      { limit: 30, before_id: oldestMessageId },
+      { limit: 30, before_id: oldestMessageId, chat_id: currentChatId },
       function (messages) {
         if (!messages || !messages.length) {
           hasMoreHistory = false;
@@ -255,6 +260,21 @@
     buildEmojiPanel();
     loadInitialHistory();
 
+    $(".chat-select").on("click", function () {
+      const newId = $(this).data("id");
+      if (newId === currentChatId) return;
+
+      currentChatId = newId;
+
+      // Сбрасываем всё для чистого листа
+      oldestMessageId = null;
+      hasMoreHistory = true;
+      $("#chatMessages").empty();
+
+      // Загружаем историю заново для нового чата
+      loadInitialHistory();
+    });
+
     $("#emojiToggle").on("click", function (e) {
       e.stopPropagation();
       toggleEmojiPanel();
@@ -271,6 +291,23 @@
       const text = $("#chatInput").val().trim();
       if (!text) return;
       sendMessage(text);
+    });
+
+    $(".chat-select").on("click", function () {
+      // 1. Визуально переключаем активную кнопку
+      $(".chat-select").removeClass("active");
+      $(this).addClass("active");
+
+      // 2. Обновляем ID текущего чата
+      currentChatId = $(this).data("id");
+
+      // 3. Очищаем чат и сбрасываем пагинацию
+      $("#chatMessages").empty();
+      oldestMessageId = null;
+      hasMoreHistory = true;
+
+      // 4. Загружаем историю нового чата
+      loadInitialHistory();
     });
 
     $("#chatInput").on("keydown", function (e) {

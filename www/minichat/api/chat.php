@@ -12,22 +12,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $message = trim((string)($input['message'] ?? ''));
+$chatId = isset($input['chat_id']) ? (int)$input['chat_id'] : 1;
 
 if ($message !== '') {
-    
+
     // 1. Сохраняем ТВОЁ сообщение
-    $stmt = $pdo->prepare("INSERT INTO messages (author, text) VALUES (?, ?)");
-    $stmt->execute(['user', $message]);
+    $stmt = $pdo->prepare("INSERT INTO messages (author, text, chat_id) VALUES (?, ?, ?)");
+    $stmt->execute(['user', $message, $chatId]);
 
     // 2. Генерируем ответ бота
     $replyText = 'вас понял';
 
     // 3. Сохраняем ответ БОТА
-    $stmt->execute(['bot', $replyText]);
+    $stmt->execute(['bot', $replyText, $chatId]);
 
     echo json_encode([
         'reply' => $replyText,
         'received' => $message,
+        'chat_id' => $chatId
     ]);
 } else {
     echo json_encode(['error' => 'Empty message']);

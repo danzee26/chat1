@@ -119,3 +119,58 @@
 .emoji-btn:hover {
   background: #e9ecef;
 }
+
+/* Делаем так, чтобы вся страница была ровно на экран */
+body, html {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Скролл только внутри блоков */
+#chatMessages, .list-group, .overflow-auto {
+  scrollbar-width: thin;
+}
+
+/* Чтобы textarea не тянулась вручную */
+#chatInput {
+  resize: none;
+  max-height: 150px;
+}
+
+/* Эффект для активного заказа */
+.list-group-item.active {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+}
+
+/* Бабблы (если слетели стили) */
+.message {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-out {
+  align-items: flex-end;
+}
+
+.message-in {
+  align-items: flex-start;
+}
+
+.bubble {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  position: relative;
+}
+
+.message-out .bubble {
+  background: #0d6efd;
+  color: white;
+}
+
+.message-in .bubble {
+  background: #f1f1f1;
+  color: black;
+}
