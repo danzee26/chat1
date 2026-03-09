@@ -5,17 +5,9 @@
 (function ($) {
   "use strict";
 
-  function loadHistory() {
-    $.get("/api/get_messages.php", function (messages) {
-      // Очищаем окно чата перед загрузкой (на всякий случай)
-      $("#chat-box").empty();
-
-      messages.forEach(function (msg) {
-        const authorName = msg.author === "user" ? "Вы" : "Бот";
-        addMessage(authorName, msg.text, msg.time);
-      });
-    });
-  }
+  let oldestMessageId = null;
+  let isLoadingHistory = false;
+  let hasMoreHistory = true;
 
   function escapeHtml(text) {
     return $("<div>").text(text).html();
@@ -111,10 +103,17 @@
     "💘",
   ];
 
-  function addMessage(author, text, time) {
+  function addMessage(author, text, time, options) {
+    const opts = options || {};
+    const prepend = !!opts.prepend;
+    const autoScroll = opts.autoScroll !== false; // по умолчанию скроллим вниз
+
     const isUser = author === "Вы";
     const sideClass = isUser ? "message-out" : "message-in";
-    $("#chatMessages").append(`
+
+    const $container = $("#chatMessages");
+
+    const $message = $(`
       <div class="message ${sideClass}">
         <div class="bubble">
           <div class="bubble-text">${escapeHtml(text)}</div>
@@ -122,7 +121,16 @@
         </div>
       </div>
     `);
-    $("#chatMessages").scrollTop($("#chatMessages")[0].scrollHeight);
+
+    if (prepend) {
+      $container.prepend($message);
+    } else {
+      $container.append($message);
+    }
+
+    if (autoScroll) {
+      $container.scrollTop($container[0].scrollHeight);
+    }
   }
 
   function sendMessage(text) {
@@ -144,6 +152,68 @@
       .fail(function () {
         addMessage("Чат", "Ошибка отправки", formatTime(new Date()));
       });
+  }
+
+  function loadInitialHistory() {
+    $.get("/api/get_messages.php", { limit: 30 }, function (messages) {
+      const $container = $("#chatMessages");
+      $container.empty();
+
+      messages.forEach(function (msg) {
+        const authorName = msg.author === "user" ? "Вы" : "Бот";
+        addMessage(authorName, msg.text, msg.time);
+      });
+
+      if (messages.length > 0) {
+        oldestMessageId = messages[0].id;
+        hasMoreHistory = true;
+      } else {
+        oldestMessageId = null;
+        hasMoreHistory = false;
+      }
+    });
+  }
+
+  function loadOlderMessages() {
+    if (isLoadingHistory || !hasMoreHistory || !oldestMessageId) return;
+    isLoadingHistory = true;
+
+    $.get(
+      "/api/get_messages.php",
+      { limit: 30, before_id: oldestMessageId },
+      function (messages) {
+        if (!messages || !messages.length) {
+          hasMoreHistory = false;
+          isLoadingHistory = false;
+          return;
+        }
+
+        const $container = $("#chatMessages");
+        const prevScrollTop = $container.scrollTop();
+        const prevScrollHeight = $container[0].scrollHeight;
+
+        for (let i = messages.length - 1; i >= 0; i--) {
+          const msg = messages[i];
+          const authorName = msg.author === "user" ? "Вы" : "Бот";
+          addMessage(authorName, msg.text, msg.time, {
+            prepend: true,
+            autoScroll: false,
+          });
+        }
+
+        oldestMessageId = messages[0].id;
+
+        const newScrollHeight = $container[0].scrollHeight;
+        const delta = newScrollHeight - prevScrollHeight;
+        $container.scrollTop(prevScrollTop + delta);
+
+        if (messages.length < 30) {
+          hasMoreHistory = false;
+        }
+
+        isLoadingHistory = false;
+      },
+    );
   }
 
   function buildEmojiPanel() {
@@ -183,7 +253,7 @@
 
   function init() {
     buildEmojiPanel();
-    loadHistory();
+    loadInitialHistory();
 
     $("#emojiToggle").on("click", function (e) {
       e.stopPropagation();
@@ -207,6 +277,13 @@
       if (e.which === 13 && !e.shiftKey) {
         e.preventDefault();
         $("#sendBtn").click();
+      }
+    });
+
+    $("#chatMessages").on("scroll", function () {
+      const $container = $(this);
+      if ($container.scrollTop() <= 0) {
+        loadOlderMessages();
       }
     });
   }
