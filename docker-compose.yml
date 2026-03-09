@@ -1,32 +1,35 @@
 services:
   # База данных
-  db:
+  mysql:
     image: mysql:8.0
-    container_name: chat_db
+    container_name: chat_mysql
     restart: unless-stopped
     environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin_pass
       MYSQL_DATABASE: minichat_db
-      MYSQL_ROOT_PASSWORD: root
     volumes:
-      - ./data/db:/var/lib/mysql
-      - ./docker/php/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data/mysql:/var/lib/mysql
+      - ./etc/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf
+      - ./etc/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app_net
 
   # Интерфейс для управления базой
   phpmyadmin:
-    image: phpmyadmin:latest
+    image: phpmyadmin:fpm-alpine
     container_name: chat_pma
     restart: unless-stopped
-    ports:
-      - "8081:80" # <-- Добавь это! Теперь PMA будет на порту 8081
     environment:
-      PMA_HOST: db
-      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+    volumes:
+      - phpmyadmin:/var/www/html
+      - ./etc/phpmyadmin/php.ini:/usr/local/etc/php/conf.d/z-custom.ini
+    depends_on:
+      - mysql
     networks:
       - app_net
-    depends_on:
-      - db
   # Новый сервис PHP
   php:
     build: ./docker/php # Указываем путь к папке с твоим PHP Dockerfile
@@ -34,6 +37,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./www:/var/www/
+      - ./logs/php:/var/log/php
+      - php_socket:/var/run/php
     networks:
       - app_net
 
@@ -47,26 +52,17 @@ services:
       - ./www:/var/www/
       - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./data/logs/nginx:/var/log/nginx
+      - ./logs/nginx:/var/log/nginx
+      - php_socket:/var/run/php
+      - phpmyadmin:/var/www/localhost/phpmyadmin:ro
     depends_on:
       - php
     networks:
       - app_net
 
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: chat_n8n
-    restart: unless-stopped
-    environment:
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - NODE_ENV=production
-    volumes:
-      - ./data/n8n:/home/node/.n8n
-    depends_on:
-      - nginx
-    networks:
-      - app_net
+volumes:
+  php_socket:
+  phpmyadmin:
 
 networks:
   app_net:

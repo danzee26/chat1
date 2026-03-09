@@ -2,10 +2,10 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-$host = 'db'; // Имя сервиса из docker-compose
+$host = 'mysql'; // Имя сервиса из docker-compose
 $db   = 'minichat_db';
-$user = 'root';
-$pass = 'root';
+$user = 'admin';
+$pass = 'admin_pass';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

@@ -14,6 +14,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $message = trim((string)($input['message'] ?? ''));
 
 if ($message !== '') {
+    
     // 1. Сохраняем ТВОЁ сообщение
     $stmt = $pdo->prepare("INSERT INTO messages (author, text) VALUES (?, ?)");
     $stmt->execute(['user', $message]);
